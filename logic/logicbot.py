@@ -5,7 +5,7 @@ bot = chatterbot.ChatBot("200 IQ", database_uri='sqlite:///db.sqlite3', read_onl
     {
         'import_path': 'logic.smart_match.SmartMatch',
         "statement_comparison_function": chatterbot.comparisons.levenshtein_distance,
-        "response_selection_method": chatterbot.response_selection.get_random_response,
+        "response_selection_method": chatterbot.response_selection.get_first_response,
         'default_response': 'Я ничего не понял, давай по новой?',
         'maximum_similarity_threshold': 0.99
     }]

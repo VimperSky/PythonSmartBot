@@ -1,10 +1,10 @@
 from chatterbot.logic import LogicAdapter
 from chatterbot import filters
+
+from logic import alternative_response_provider
 from logic.smart_search import SmartSearch
-import logic.alternative_response_provider
 
 class SmartMatch(LogicAdapter):
-
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
 
@@ -15,22 +15,7 @@ class SmartMatch(LogicAdapter):
     def can_process(self, statement):
         return True
 
-    def process(self, input_statement, additional_response_selection_parameters=None):
-        search_results = self.smart_search.search(input_statement)
-        # Use the input statement as the closest match if no other results are found
-
-        closest_match = next(search_results, input_statement)
-
-        # Search for the closest match to the input statement
-        for result in search_results:
-            if result is None:
-                print('Force search stop due to long search time!')
-                break
-
-            closest_match = result
-            if result.  confidence >= self.maximum_similarity_threshold:
-                break
-
+    def use_response(self, input_statement, closest_match, additional_response_selection_parameters):
         self.chatbot.logger.info('Using "{}" as a close match to "{}" with a confidence of {}'.format(
             closest_match.text, input_statement.text, closest_match.confidence
         ))
@@ -85,8 +70,13 @@ class SmartMatch(LogicAdapter):
                 self.chatbot.storage
             )
 
+            #with open("responses.txt", "w", encoding="utf-8") as f:
+            #    for resp in response_list:
+            #        f.write(str(resp) + "\n")
+
             response.confidence = closest_match.confidence
             self.chatbot.logger.info('Response selected. Using "{}"'.format(response.text))
+            return response
         elif alternate_response_list:
             '''
             The case where there was no responses returned for the selected match
@@ -105,7 +95,32 @@ class SmartMatch(LogicAdapter):
 
             response.confidence = closest_match.confidence
             self.chatbot.logger.info('Alternate response selected. Using "{}"'.format(response.text))
+            return response
         else:
+            return None
+
+
+    def process(self, input_statement, additional_response_selection_parameters=None):
+        search_results = self.smart_search.search(input_statement)
+        # Use the input statement as the closest match if no other results are found
+
+        found_results = []
+        for result in search_results:
+            if result is None:
+                print('Force search stop due to long search time!')
+                break
+
+            found_results.append(result)
+
+            if result.confidence >= self.maximum_similarity_threshold:
+                break
+
+        response = None
+        while len(found_results) > 0 and response is None:
+            use_match = found_results.pop()
+            response = self.use_response(input_statement, use_match, additional_response_selection_parameters)
+
+        if response is None:
             response = alternative_response_provider.get_response(input_statement)
 
         return response
