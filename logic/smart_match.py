@@ -15,19 +15,6 @@ class SmartMatch(LogicAdapter):
     def can_process(self, statement):
         return True
 
-    def smart_select(self, response_list):
-
-        self.chatbot.logger.info('Selecting response with maximum rating.')
-
-        best_statement = None
-        max_rating = 0
-        for statement in response_list:
-            if statement.amount > max_rating:
-                best_statement = statement
-                max_rating = statement.amount
-
-        return best_statement
-
 
     def use_response(self, input_statement, closest_match, additional_response_selection_parameters):
         self.chatbot.logger.info('Using "{}" as a close match to "{}" with a confidence of {}'.format(
@@ -78,8 +65,11 @@ class SmartMatch(LogicAdapter):
                 )
             )
 
-            response = self.smart_select(response_list)
-
+            response = self.select_response(
+                input_statement,
+                response_list,
+                self.chatbot.storage
+            )
             with open('responses.txt', "w", encoding="utf-8") as f:
                 for resp in response_list:
                     f.write(resp.text + '\n')

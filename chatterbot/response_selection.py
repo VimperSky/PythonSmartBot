@@ -4,6 +4,19 @@ the event that multiple responses are generated within a logic adapter.
 """
 import logging
 
+def get_most_rated_response(input_statement, response_list, storage=None):
+    logger = logging.getLogger(__name__)
+    logger.info('Selecting response with maximum rating.')
+
+    best_statement = None
+    max_rating = 0
+    for statement in response_list:
+        if statement.amount > max_rating:
+            best_statement = statement
+            max_rating = statement.amount
+
+    return best_statement
+
 
 def get_most_frequent_response(input_statement, response_list, storage=None):
     """
