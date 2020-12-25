@@ -1,35 +1,41 @@
 from chatterbot.logic import LogicAdapter
 from chatterbot import filters
 
-from logic import alternative_response_provider
-from logic.smart_search import SmartSearch
 
-class SmartMatch(LogicAdapter):
+class BestMatch(LogicAdapter):
+    """
+    A logic adapter that returns a response based on known responses to
+    the closest matches to the input statement.
+
+    :param excluded_words:
+        The excluded_words parameter allows a list of words to be set that will
+        prevent the logic adapter from returning statements that have text
+        containing any of those words. This can be useful for preventing your
+        chat bot from saying swears when it is being demonstrated in front of
+        an audience.
+        Defaults to None
+    :type excluded_words: list
+    """
+
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
 
         self.excluded_words = kwargs.get('excluded_words')
-        self.smart_search = SmartSearch(chatbot)
 
+    def process(self, input_statement, additional_response_selection_parameters=None):
+        search_results = self.search_algorithm.search(input_statement)
 
-    def can_process(self, statement):
-        return True
+        # Use the input statement as the closest match if no other results are found
+        closest_match = next(search_results, input_statement)
 
-    def smart_select(self, response_list):
+        # Search for the closest match to the input statement
+        for result in search_results:
 
-        self.chatbot.logger.info('Selecting response with maximum rating.')
+            # Stop searching if a match that is close enough is found
+            if result.confidence >= self.maximum_similarity_threshold:
+                closest_match = result
+                break
 
-        best_statement = None
-        max_rating = 0
-        for statement in response_list:
-            if statement.amount > max_rating:
-                best_statement = statement
-                max_rating = statement.amount
-
-        return best_statement
-
-
-    def use_response(self, input_statement, closest_match, additional_response_selection_parameters):
         self.chatbot.logger.info('Using "{}" as a close match to "{}" with a confidence of {}'.format(
             closest_match.text, input_statement.text, closest_match.confidence
         ))
@@ -78,16 +84,14 @@ class SmartMatch(LogicAdapter):
                 )
             )
 
-            response = self.smart_select(response_list)
-
-            with open('responses.txt', "w", encoding="utf-8") as f:
-                for resp in response_list:
-                    f.write(resp.text + '\n')
-
+            response = self.select_response(
+                input_statement,
+                response_list,
+                self.chatbot.storage
+            )
 
             response.confidence = closest_match.confidence
             self.chatbot.logger.info('Response selected. Using "{}"'.format(response.text))
-            return response
         elif alternate_response_list:
             '''
             The case where there was no responses returned for the selected match
@@ -106,32 +110,7 @@ class SmartMatch(LogicAdapter):
 
             response.confidence = closest_match.confidence
             self.chatbot.logger.info('Alternate response selected. Using "{}"'.format(response.text))
-            return response
         else:
-            return None
-
-
-    def process(self, input_statement, additional_response_selection_parameters=None):
-        search_results = self.smart_search.search(input_statement)
-        # Use the input statement as the closest match if no other results are found
-
-        found_results = []
-        for result in search_results:
-            if result is None:
-                print('Force search stop due to long search time!')
-                break
-
-            found_results.append(result)
-
-            if result.confidence >= self.maximum_similarity_threshold:
-                break
-
-        response = None
-        while len(found_results) > 0 and response is None:
-            use_match = found_results.pop()
-            response = self.use_response(input_statement, use_match, additional_response_selection_parameters)
-
-        if response is None:
-            response = alternative_response_provider.get_response(input_statement)
+            response = self.get_default_response(input_statement)
 
         return response
