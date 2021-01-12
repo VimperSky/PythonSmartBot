@@ -51,6 +51,7 @@ class SmartMatch(LogicAdapter):
 
         # Get all statements that are in response to the closest match
         response_list = list(self.chatbot.storage.filter(**response_selection_parameters))
+        response_list.insert(0, closest_match)
 
         alternate_response_list = []
 

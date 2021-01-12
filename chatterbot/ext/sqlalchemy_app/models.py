@@ -99,8 +99,6 @@ class Statement(Base, StatementMixin):
         server_default=''
     )
 
-    amount = Column(Integer, nullable=False)
-
     def get_tags(self):
         """
         Return a list of tags for this statement.

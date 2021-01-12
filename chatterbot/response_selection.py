@@ -4,19 +4,6 @@ the event that multiple responses are generated within a logic adapter.
 """
 import logging
 
-def get_most_rated_response(input_statement, response_list, storage=None):
-    logger = logging.getLogger(__name__)
-    logger.info('Selecting response with maximum rating.')
-
-    best_statement = None
-    max_rating = 0
-    for statement in response_list:
-        if statement.amount > max_rating:
-            best_statement = statement
-            max_rating = statement.amount
-
-    return best_statement
-
 
 def get_most_frequent_response(input_statement, response_list, storage=None):
     """
@@ -74,6 +61,38 @@ def get_first_response(input_statement, response_list, storage=None):
         len(response_list)
     ))
     return response_list[0]
+
+def get_best_response(input_statement, response_list, storage=None):
+    """
+    :param input_statement: A statement, that closely matches an input to the chat bot.
+    :type input_statement: Statement
+
+    :param response_list: A list of statement options to choose a response from.
+    :type response_list: list
+
+    :param storage: An instance of a storage adapter to allow the response selection
+                    method to access other statements if needed.
+    :type storage: StorageAdapter
+
+    :return: Return the first statement in the response list.
+    :rtype: Statement
+    """
+    logger = logging.getLogger(__name__)
+    logger.info('Selecting best response from list of {} options.'.format(
+        len(response_list)
+    ))
+
+    count = list(storage.filter(
+        in_response_to=str(response_list[0]))
+    )
+
+    if count:
+        return count[0]
+
+    if response_list[1]:
+        return response_list[1]
+    else:
+        return "Не знаю"
 
 
 def get_random_response(input_statement, response_list, storage=None):

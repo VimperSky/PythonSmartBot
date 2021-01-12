@@ -19,7 +19,6 @@ class StatementMixin(object):
         'in_response_to',
         'search_in_response_to',
         'created_at',
-        'amount',
     ]
 
     extra_statement_field_names = []
@@ -78,7 +77,6 @@ class Statement(StatementMixin):
         'in_response_to',
         'search_in_response_to',
         'created_at',
-        'amount',
         'confidence',
         'storage',
     )
@@ -94,7 +92,6 @@ class Statement(StatementMixin):
         self.in_response_to = in_response_to
         self.search_in_response_to = kwargs.get('search_in_response_to', '')
         self.created_at = kwargs.get('created_at', datetime.now())
-        self.amount = kwargs.get('amount', 0)
 
         if not isinstance(self.created_at, datetime):
             self.created_at = date_parser.parse(self.created_at)
