@@ -1,5 +1,5 @@
 # Описание проекта
-**PythonSmartBot - это чат-бот свободного общения с возможностью интеграции в любые мессенджеры (на данный момент поддерживается Telegram).**
+**PythonSmartBot - это чат-бот свободного общения с возможностью интеграции в любые мессенджеры (на данный момент поддерживается Telegram). **
 
 
 # Используемые технологии
@@ -8,6 +8,9 @@ Python 3.7.9 (https://www.python.org/downloads/release/python-379/) - основ
 Chatterbot (https://github.com/gunthercox/ChatterBot) - библиотека для быстрого написания чат-ботов.
 
 Python Telegram Bot (https://github.com/python-telegram-bot/python-telegram-bot) - библиотека для подключения бота к Telegram.
+
+Датасеты для обучения: https://github.com/Koziev/NLP_Datasets
+
 
 ## Описание библиотеки Chatterbot
 ChatterBot - это библиотека для Python, которая упрощает создание автоматических ответов на ввод пользователя. 
