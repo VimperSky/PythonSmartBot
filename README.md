@@ -14,5 +14,7 @@ ChatterBot использует набор алгоритмов машинног
 
 # Инструкция по запуску
 clone https://github.com/AnImperialMan/PythonSmartBot
+
 cd PythonSmartBot
+
 pip install -r requirements.txt
