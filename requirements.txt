@@ -6,3 +6,4 @@ nltk~=3.5
 PyYAML~=3.13
 python-dateutil~=2.7.5
 pytz~=2020.1
+python-telegram-bot
